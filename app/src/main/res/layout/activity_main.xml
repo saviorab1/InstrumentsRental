@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:padding="16dp"
+        android:gravity="center_horizontal"
         tools:context=".MainActivity">
 
+        <!-- Title -->
         <TextView
             android:id="@+id/titleTextView"
             android:layout_width="wrap_content"
@@ -18,93 +20,73 @@
             android:text="Instrument Rental"
             android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_marginBottom="24dp" />
 
+        <!-- Instrument Spinner -->
         <Spinner
             android:id="@+id/instrumentSpinner"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
+            android:layout_marginBottom="24dp" />
 
+        <!-- Instrument Image -->
         <ImageView
             android:id="@+id/instrumentImage"
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:layout_marginTop="24dp"
             android:contentDescription="Instrument image"
             android:scaleType="fitCenter"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/instrumentSpinner"
-            tools:src="@drawable/piano" />
+            android:layout_marginBottom="16dp" />
 
+        <!-- Instrument Name -->
         <TextView
             android:id="@+id/instrumentName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/instrumentImage"
+            android:layout_marginBottom="8dp"
             tools:text="Steinway Piano" />
 
-        <!-- Rating Bar -->
+        <!-- Rating Container -->
         <LinearLayout
             android:id="@+id/ratingContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/instrumentName" />
+            android:layout_marginBottom="16dp" />
 
-        <!-- Rent period chips -->
-        <com.google.android.material.chip.ChipGroup
+        <!-- Period Selection using RadioGroup instead of ChipGroup -->
+        <RadioGroup
             android:id="@+id/periodChipGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:singleSelection="true"
-            app:selectionRequired="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ratingContainer">
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
 
-            <com.google.android.material.chip.Chip
+            <RadioButton
                 android:id="@+id/weeklyChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Weekly"
-                android:checkable="true"
-                android:checked="true" />
+                android:checked="true"
+                android:layout_marginEnd="16dp" />
 
-            <com.google.android.material.chip.Chip
+            <RadioButton
                 android:id="@+id/monthlyChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Monthly"
-                android:checkable="true" />
-        </com.google.android.material.chip.ChipGroup>
+                android:text="Monthly" />
+        </RadioGroup>
 
         <!-- Quantity input -->
         <LinearLayout
             android:id="@+id/quantityContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/periodChipGroup">
+            android:layout_marginBottom="16dp">
 
             <TextView
                 android:id="@+id/quantityLabel"
@@ -123,38 +105,31 @@
                 android:textAlignment="center" />
         </LinearLayout>
 
+        <!-- Total Price -->
         <TextView
             android:id="@+id/totalPriceTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:textSize="24sp"
-            android:textColor="?attr/colorPrimary"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/quantityContainer"
+            android:textColor="@color/purple_500"
+            android:layout_marginBottom="4dp"
             tools:text="250 credits total" />
 
+        <!-- Price per period -->
         <TextView
             android:id="@+id/pricePerPeriodTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/totalPriceTextView"
+            android:layout_marginBottom="16dp"
             tools:text="(250 credits per week)" />
 
+        <!-- Description -->
         <TextView
             android:id="@+id/descriptionTextView"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:textAlignment="center"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pricePerPeriodTextView"
             tools:text="Steinway grand piano perfect for Green Book's performances" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </ScrollView> 

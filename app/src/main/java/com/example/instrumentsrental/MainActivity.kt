@@ -8,8 +8,6 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.instrumentsrental.model.Instrument
 import com.example.instrumentsrental.utils.InstrumentDataProvider
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 
 class MainActivity : AppCompatActivity() {
     
@@ -18,9 +16,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var instrumentImage: ImageView
     private lateinit var instrumentName: TextView
     private lateinit var ratingContainer: LinearLayout
-    private lateinit var periodChipGroup: ChipGroup
-    private lateinit var weeklyChip: Chip
-    private lateinit var monthlyChip: Chip
+    private lateinit var periodGroup: RadioGroup
+    private lateinit var weeklyRadioButton: RadioButton
+    private lateinit var monthlyRadioButton: RadioButton
     private lateinit var quantityLabel: TextView
     private lateinit var quantityEditText: EditText
     private lateinit var totalPriceTextView: TextView
@@ -41,9 +39,9 @@ class MainActivity : AppCompatActivity() {
         instrumentImage = findViewById(R.id.instrumentImage)
         instrumentName = findViewById(R.id.instrumentName)
         ratingContainer = findViewById(R.id.ratingContainer)
-        periodChipGroup = findViewById(R.id.periodChipGroup)
-        weeklyChip = findViewById(R.id.weeklyChip)
-        monthlyChip = findViewById(R.id.monthlyChip)
+        periodGroup = findViewById(R.id.periodChipGroup)
+        weeklyRadioButton = findViewById(R.id.weeklyChip)
+        monthlyRadioButton = findViewById(R.id.monthlyChip)
         quantityLabel = findViewById(R.id.quantityLabel)
         quantityEditText = findViewById(R.id.quantityEditText)
         totalPriceTextView = findViewById(R.id.totalPriceTextView)
@@ -51,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         descriptionTextView = findViewById(R.id.descriptionTextView)
         
         setupSpinner()
-        setupPeriodChips()
+        setupPeriodRadioButtons()
         setupQuantityInput()
     }
     
@@ -79,9 +77,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    private fun setupPeriodChips() {
-        periodChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
-            isMonthly = monthlyChip.id in checkedIds
+    private fun setupPeriodRadioButtons() {
+        periodGroup.setOnCheckedChangeListener { _, checkedId ->
+            isMonthly = checkedId == R.id.monthlyChip
             updateQuantityLabel()
             updatePriceDisplay()
         }
