@@ -20,6 +20,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".CreditsActivity"
+            android:exported="false"
+            android:label="Credits Management" />
     </application>
 
 </manifest>

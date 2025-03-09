@@ -1,12 +1,16 @@
 package com.example.instrumentsrental
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.instrumentsrental.model.Instrument
+import com.example.instrumentsrental.utils.CreditsManager
 import com.example.instrumentsrental.utils.InstrumentDataProvider
 
 class MainActivity : AppCompatActivity() {
@@ -25,14 +29,23 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pricePerPeriodTextView: TextView
     private lateinit var descriptionTextView: TextView
     
+    // Add credits manager
+    private lateinit var creditsManager: CreditsManager
+    
     // State variables
     private var currentInstrument: Instrument? = null
     private var isMonthly = false
     private var quantity = 1
     
+    // Reference to menu item
+    private var creditsMenuItem: MenuItem? = null
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        
+        // Initialize credits manager
+        creditsManager = CreditsManager(this)
         
         // Initialize views
         instrumentSpinner = findViewById(R.id.instrumentSpinner)
@@ -51,6 +64,17 @@ class MainActivity : AppCompatActivity() {
         setupSpinner()
         setupPeriodRadioButtons()
         setupQuantityInput()
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Update credits display when returning to this activity
+        updateCreditsDisplay()
+    }
+    
+    private fun updateCreditsDisplay() {
+        // Update the menu item text if available
+        creditsMenuItem?.title = "$${creditsManager.getCreditsBalance()}"
     }
     
     private fun setupSpinner() {
@@ -165,5 +189,24 @@ class MainActivity : AppCompatActivity() {
         
         totalPriceTextView.text = "$totalPrice credits total"
         pricePerPeriodTextView.text = "(${basePrice} credits per ${if (isMonthly) "month" else "week"})"
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        creditsMenuItem = menu.findItem(R.id.action_credits)
+        updateCreditsDisplay() // Set initial credits value
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_credits -> {
+                // Launch the Credits Activity
+                val intent = Intent(this, CreditsActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }
