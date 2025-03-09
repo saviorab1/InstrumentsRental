@@ -115,11 +115,11 @@ class MainActivity : AppCompatActivity() {
         val instrument = InstrumentDataProvider.getInstrumentByCategory(category)
         currentInstrument = instrument
         
-        // Update UI with instrument details
-        instrumentImage.setImageResource(instrument.imageRes)
+        // Update UI with instrument details in the correct order
         instrumentName.text = instrument.name
-        setupRatingBar(instrument.rating)
         descriptionTextView.text = instrument.description
+        setupRatingBar(instrument.rating)
+        instrumentImage.setImageResource(instrument.imageRes)
         
         updatePriceDisplay()
     }
@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity() {
             val isFilled = i <= roundedRating
             val starImageView = ImageView(this).apply {
                 setImageResource(R.drawable.star)
-                layoutParams = LinearLayout.LayoutParams(96, 96)
+                layoutParams = LinearLayout.LayoutParams(120, 120)
                 alpha = if (isFilled) 1f else 0.3f
             }
             ratingContainer.addView(starImageView)
@@ -147,8 +147,8 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            setPadding(16, 0, 0, 0)
-            textSize = 18f
+            setPadding(20, 0, 0, 0)
+            textSize = 24f
         }
         ratingContainer.addView(ratingText)
     }

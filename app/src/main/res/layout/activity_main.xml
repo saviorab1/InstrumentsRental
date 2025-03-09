@@ -8,128 +8,150 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="24dp"
         android:gravity="center_horizontal"
         tools:context=".MainActivity">
 
-        <!-- Title -->
+        <!-- Title - Larger font -->
         <TextView
             android:id="@+id/titleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Instrument Rental"
-            android:textSize="24sp"
+            android:textSize="32sp"
             android:textStyle="bold"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Instrument Spinner -->
-        <Spinner
-            android:id="@+id/instrumentSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Instrument Image -->
-        <ImageView
-            android:id="@+id/instrumentImage"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:contentDescription="Instrument image"
-            android:scaleType="fitCenter"
             android:layout_marginBottom="16dp" />
 
-        <!-- Instrument Name -->
+        <!-- Instrument Name - Moved up, larger -->
         <TextView
             android:id="@+id/instrumentName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
+            android:textSize="28sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="16dp"
             tools:text="Steinway Piano" />
 
-        <!-- Rating Container -->
+        <!-- Description - Moved up, below title -->
+        <TextView
+            android:id="@+id/descriptionTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:layout_marginBottom="24dp"
+            tools:text="Steinway grand piano perfect for Green Book's performances" />
+
+        <!-- Rating Container - Larger -->
         <LinearLayout
             android:id="@+id/ratingContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="24dp" />
 
-        <!-- Period Selection using RadioGroup instead of ChipGroup -->
+        <!-- Instrument Spinner -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select an instrument:"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp"/>
+
+        <Spinner
+            android:id="@+id/instrumentSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Instrument Image - Much larger -->
+        <ImageView
+            android:id="@+id/instrumentImage"
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            android:contentDescription="Instrument image"
+            android:scaleType="fitCenter"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Period Selection - Larger text -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rental Period:"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp"/>
+            
         <RadioGroup
             android:id="@+id/periodChipGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="24dp">
 
             <RadioButton
                 android:id="@+id/weeklyChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Weekly"
+                android:textSize="18sp"
                 android:checked="true"
-                android:layout_marginEnd="16dp" />
+                android:layout_marginEnd="32dp" />
 
             <RadioButton
                 android:id="@+id/monthlyChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="18sp"
                 android:text="Monthly" />
         </RadioGroup>
 
-        <!-- Quantity input -->
+        <!-- Quantity input - Larger -->
         <LinearLayout
             android:id="@+id/quantityContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="24dp">
 
             <TextView
                 android:id="@+id/quantityLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Number of weeks:" />
+                android:text="Number of weeks:"
+                android:textSize="18sp" />
 
             <EditText
                 android:id="@+id/quantityEditText"
-                android:layout_width="80dp"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="16dp"
                 android:inputType="number"
                 android:maxLength="2"
                 android:text="1"
+                android:textSize="18sp"
                 android:textAlignment="center" />
         </LinearLayout>
 
-        <!-- Total Price -->
+        <!-- Total Price - Much larger -->
         <TextView
             android:id="@+id/totalPriceTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="24sp"
+            android:textSize="32sp"
+            android:textStyle="bold"
             android:textColor="@color/purple_500"
-            android:layout_marginBottom="4dp"
+            android:layout_marginBottom="8dp"
             tools:text="250 credits total" />
 
-        <!-- Price per period -->
+        <!-- Price per period - Larger -->
         <TextView
             android:id="@+id/pricePerPeriodTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:textSize="20sp"
+            android:layout_marginBottom="24dp"
             tools:text="(250 credits per week)" />
-
-        <!-- Description -->
-        <TextView
-            android:id="@+id/descriptionTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            tools:text="Steinway grand piano perfect for Green Book's performances" />
 
     </LinearLayout>
 </ScrollView> 
