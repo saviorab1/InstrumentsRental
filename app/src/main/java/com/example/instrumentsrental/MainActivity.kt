@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -63,6 +64,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate: Initializing MainActivity")
         setContentView(R.layout.activity_main)
+        
+        // Set activity title
+        title = "MUSICLEASE"
         
         // Initialize credits manager
         creditsManager = CreditsManager(this)
@@ -132,7 +136,16 @@ class MainActivity : AppCompatActivity() {
     private fun updateCreditsDisplay() {
         val credits = creditsManager.getCreditsBalance()
         Log.d(TAG, "updateCreditsDisplay: Current credits balance: $credits")
-        creditsMenuItem?.title = "$${credits}"
+        
+        // Get the menu item and apply custom styling
+        creditsMenuItem?.let { menuItem ->
+            // Create a SpannableString to apply custom styling
+            val creditText = "$${credits}"
+            val spannableString = android.text.SpannableString(creditText)
+            
+            // Set the title with the styled text
+            menuItem.title = spannableString
+        }
     }
     
     /**
@@ -143,13 +156,34 @@ class MainActivity : AppCompatActivity() {
         val categories = InstrumentDataProvider.getCategories()
         Log.d(TAG, "setupSpinner: Loading ${categories.size} instrument categories")
         
-        val adapter = ArrayAdapter(
+        // Custom adapter with improved styling
+        val adapter = object : ArrayAdapter<String>(
             this,
             android.R.layout.simple_spinner_item,
             categories
-        )
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        ) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent)
+                if (view is TextView) {
+                    view.typeface = resources.getFont(R.font.open_sans_semibold)
+                    view.textSize = 16f
+                    view.setPadding(8, 16, 8, 16)
+                }
+                return view
+            }
+            
+            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getDropDownView(position, convertView, parent)
+                if (view is TextView) {
+                    view.typeface = resources.getFont(R.font.open_sans_regular)
+                    view.setTextColor(resources.getColor(R.color.black, null))
+                    view.setPadding(24, 16, 24, 16)
+                }
+                return view
+            }
+        }
         
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         instrumentSpinner.adapter = adapter
         
         instrumentSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -287,6 +321,9 @@ class MainActivity : AppCompatActivity() {
             textSize = resources.getDimension(R.dimen.rating_text_size) / 
                        resources.displayMetrics.density
             gravity = android.view.Gravity.CENTER_VERTICAL
+            
+            // Apply custom font
+            typeface = resources.getFont(R.font.open_sans_semibold)
         }
         ratingContainer.addView(ratingText)
     }
@@ -339,7 +376,8 @@ class MainActivity : AppCompatActivity() {
         
         if (totalPrice > currentBalance) {
             Log.d(TAG, "processBorrowing: Insufficient credits, showing dialog")
-            AlertDialog.Builder(this)
+            // Using themed dialog
+            AlertDialog.Builder(this, R.style.AppDialogTheme)
                 .setTitle(R.string.title_insufficient_credits)
                 .setMessage(getString(R.string.message_insufficient_credits, totalPrice, currentBalance))
                 .setPositiveButton(R.string.action_add_credits) { _, _ ->
@@ -393,7 +431,17 @@ class MainActivity : AppCompatActivity() {
         quantityEditText.setText("1")
         quantity = 1
         
-        Toast.makeText(this, R.string.message_selection_reset, Toast.LENGTH_SHORT).show()
+        // Custom toast with better styling
+        val toast = Toast.makeText(this, R.string.message_selection_reset, Toast.LENGTH_SHORT)
+        val view = toast.view
+        view?.apply {
+            background.setTint(resources.getColor(R.color.purple_700, null))
+            findViewById<TextView>(android.R.id.message)?.apply {
+                setTextColor(resources.getColor(android.R.color.white, null))
+                typeface = resources.getFont(R.font.open_sans_semibold)
+            }
+        }
+        toast.show()
     }
     
     /**
@@ -404,8 +452,33 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onCreateOptionsMenu: Creating options menu")
         menuInflater.inflate(R.menu.main_menu, menu)
         creditsMenuItem = menu.findItem(R.id.action_credits)
+        
+        // Set the title text color programmatically
+        val spanString = android.text.SpannableString(creditsMenuItem?.title)
+        spanString.setSpan(android.text.style.ForegroundColorSpan(android.graphics.Color.parseColor("#4CAF50")), 
+            0, spanString.length, 0)
+        spanString.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 
+            0, spanString.length, 0)
+        creditsMenuItem?.title = spanString
+        
         updateCreditsDisplay()
         return true
+    }
+    
+    /**
+     * Handle options menu item selection.
+     * Handles navigation to Credits Activity when credits balance is clicked.
+     */
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        Log.d(TAG, "onOptionsItemSelected: Menu item selected: ${item.itemId}")
+        return when (item.itemId) {
+            R.id.action_credits -> {
+                Log.d(TAG, "onOptionsItemSelected: Credits menu item clicked, navigating to CreditsActivity")
+                startActivity(Intent(this, CreditsActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
     
     /**

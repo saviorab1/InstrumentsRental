@@ -15,6 +15,7 @@ import com.example.instrumentsrental.model.RentalDetails
 import com.example.instrumentsrental.utils.CreditsManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import android.util.Log
 
 /**
  * UserInfoActivity - Handles user information collection for instrument rental.
@@ -22,11 +23,14 @@ import com.google.android.material.textfield.TextInputLayout
  */
 class UserInfoActivity : AppCompatActivity() {
     
+    private val TAG = "UserInfoActivity"
+    
     // UI components - Instrument details
     private lateinit var instrumentNameTextView: TextView
     private lateinit var instrumentImageView: ImageView
-    private lateinit var descriptionTextView: TextView
+    private lateinit var instrumentDescriptionTextView: TextView
     private lateinit var rentalDetailsTextView: TextView
+    private lateinit var totalPriceTextView: TextView
     
     // UI components - Input layouts
     private lateinit var nameInputLayout: TextInputLayout
@@ -56,20 +60,33 @@ class UserInfoActivity : AppCompatActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate: Initializing UserInfoActivity")
         setContentView(R.layout.activity_user_info)
         
-        // Enable the back button in the action bar
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
+        // Set activity title
+        title = "MUSICLEASE"
         
-        // Get rental details from intent
-        rentalDetails = intent.getParcelableExtra("RENTAL_DETAILS") ?: 
-            throw IllegalArgumentException("No rental details provided")
+        // Display back button
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         
         // Initialize credits manager
         creditsManager = CreditsManager(this)
         
+        // Initialize views
         initializeViews()
+        
+        // Get rental details from intent
+        val rentalDetailsFromIntent = intent.getParcelableExtra<RentalDetails>("RENTAL_DETAILS")
+        if (rentalDetailsFromIntent == null) {
+            Log.e(TAG, "onCreate: RentalDetails is null")
+            Toast.makeText(this, "Error loading rental details", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+        
+        rentalDetails = rentalDetailsFromIntent
+        
+        // Setup UI components with rental details
         setupValidation()
         populateRentalDetails()
         setupButtons()
@@ -79,21 +96,28 @@ class UserInfoActivity : AppCompatActivity() {
      * Initialize all UI views from layout. Binds layout elements to properties.
      */
     private fun initializeViews() {
+        Log.d(TAG, "initializeViews: Binding UI elements")
+        
+        // Initialize instrument details views
         instrumentNameTextView = findViewById(R.id.instrumentNameTextView)
         instrumentImageView = findViewById(R.id.instrumentImageView)
-        descriptionTextView = findViewById(R.id.descriptionTextView)
+        instrumentDescriptionTextView = findViewById(R.id.instrumentDescriptionTextView)
         rentalDetailsTextView = findViewById(R.id.rentalDetailsTextView)
+        totalPriceTextView = findViewById(R.id.totalPriceTextView)
         
+        // Initialize input layouts
         nameInputLayout = findViewById(R.id.nameInputLayout)
         addressInputLayout = findViewById(R.id.addressInputLayout)
         phoneInputLayout = findViewById(R.id.phoneInputLayout)
         emailInputLayout = findViewById(R.id.emailInputLayout)
         
+        // Initialize input fields
         nameEditText = findViewById(R.id.nameEditText)
         addressEditText = findViewById(R.id.addressEditText)
         phoneEditText = findViewById(R.id.phoneEditText)
         emailEditText = findViewById(R.id.emailEditText)
         
+        // Initialize buttons
         cancelButton = findViewById(R.id.cancelButton)
         confirmButton = findViewById(R.id.confirmButton)
     }
@@ -170,16 +194,25 @@ class UserInfoActivity : AppCompatActivity() {
      * Displays instrument information retrieved from the intent.
      */
     private fun populateRentalDetails() {
-        instrumentNameTextView.text = rentalDetails.instrumentName
-        instrumentImageView.setImageResource(rentalDetails.instrumentImageRes)
-        descriptionTextView.text = rentalDetails.instrumentDescription
+        Log.d(TAG, "populateRentalDetails: Setting up UI with rental details")
         
-        // Format rental details text
-        rentalDetailsTextView.text = getString(
-            R.string.rental_details_format, 
-            rentalDetails.rentalPeriod, 
-            rentalDetails.totalPrice
-        )
+        try {
+            instrumentNameTextView.text = rentalDetails.instrumentName
+            instrumentImageView.setImageResource(rentalDetails.instrumentImageRes)
+            instrumentDescriptionTextView.text = rentalDetails.instrumentDescription
+            
+            // Display rental period
+            val rentalPeriodText = "Rental Period: ${rentalDetails.rentalPeriod}"
+            rentalDetailsTextView.text = rentalPeriodText
+            
+            // Display total price
+            val totalPriceText = "$${rentalDetails.totalPrice} credits"
+            totalPriceTextView.text = totalPriceText
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "populateRentalDetails: Error setting up UI", e)
+            Toast.makeText(this, "Error displaying rental details", Toast.LENGTH_SHORT).show()
+        }
     }
     
     /**
@@ -188,7 +221,7 @@ class UserInfoActivity : AppCompatActivity() {
      */
     private fun setupButtons() {
         cancelButton.setOnClickListener {
-            Toast.makeText(this, R.string.message_booking_cancelled, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Booking cancelled", Toast.LENGTH_SHORT).show()
             finish()
         }
         
@@ -205,7 +238,7 @@ class UserInfoActivity : AppCompatActivity() {
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            Toast.makeText(this, R.string.message_booking_cancelled, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Booking cancelled", Toast.LENGTH_SHORT).show()
             finish()
             return true
         }
@@ -289,7 +322,7 @@ class UserInfoActivity : AppCompatActivity() {
             Instrument: ${rentalDetails.instrumentName}
             
             Rental Period: ${rentalDetails.rentalPeriod}
-            Total Price: ${rentalDetails.totalPrice} credits
+            Total Price: $${rentalDetails.totalPrice} credits
             
             Your Details:
             Name: $name
@@ -300,13 +333,13 @@ class UserInfoActivity : AppCompatActivity() {
             Confirm this rental?
         """.trimIndent()
         
-        AlertDialog.Builder(this)
-            .setTitle(R.string.confirm_rental_title)
+        AlertDialog.Builder(this, R.style.AppDialogTheme)
+            .setTitle("Confirm Rental")
             .setMessage(message)
-            .setPositiveButton(R.string.action_confirm) { _, _ ->
+            .setPositiveButton("Confirm") { _, _ ->
                 processRental()
             }
-            .setNegativeButton(R.string.action_cancel, null)
+            .setNegativeButton("Cancel", null)
             .show()
     }
     
@@ -315,27 +348,32 @@ class UserInfoActivity : AppCompatActivity() {
      * Updates credits balance and displays success message.
      */
     private fun processRental() {
-        val currentBalance = creditsManager.getCreditsBalance()
-        val newBalance = currentBalance - rentalDetails.totalPrice
-        
-        // Update credits balance
-        creditsManager.setCreditsBalance(newBalance)
-        
-        // Update the displayed balance
-        updateCreditsDisplay()
-        
-        // Show success message
-        AlertDialog.Builder(this)
-            .setTitle(R.string.rental_success_title)
-            .setMessage("You have successfully rented a ${rentalDetails.instrumentName} for ${rentalDetails.rentalPeriod}.\n\n" +
-                    "Amount charged: ${rentalDetails.totalPrice} credits\n" +
-                    "Remaining balance: $newBalance credits")
-            .setPositiveButton("OK") { _, _ ->
-                setResult(RESULT_OK)
-                finish()
-            }
-            .setCancelable(false)
-            .show()
+        try {
+            val currentBalance = creditsManager.getCreditsBalance()
+            val newBalance = currentBalance - rentalDetails.totalPrice
+            
+            // Update credits balance
+            creditsManager.setCreditsBalance(newBalance)
+            
+            // Update the displayed balance
+            updateCreditsDisplay()
+            
+            // Show success message
+            AlertDialog.Builder(this, R.style.AppDialogTheme)
+                .setTitle("Rental Successful!")
+                .setMessage("You have successfully rented a ${rentalDetails.instrumentName} for ${rentalDetails.rentalPeriod}.\n\n" +
+                        "Amount charged: $${rentalDetails.totalPrice} credits\n" +
+                        "Remaining balance: $$newBalance credits")
+                .setPositiveButton("OK") { _, _ ->
+                    setResult(RESULT_OK)
+                    finish()
+                }
+                .setCancelable(false)
+                .show()
+        } catch (e: Exception) {
+            Log.e(TAG, "processRental: Error processing rental", e)
+            Toast.makeText(this, "Error processing rental", Toast.LENGTH_LONG).show()
+        }
     }
     
     /**
@@ -345,6 +383,15 @@ class UserInfoActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         creditsMenuItem = menu.findItem(R.id.action_credits)
+        
+        // Set the title text color programmatically
+        val spanString = android.text.SpannableString(creditsMenuItem?.title)
+        spanString.setSpan(android.text.style.ForegroundColorSpan(android.graphics.Color.parseColor("#4CAF50")), 
+            0, spanString.length, 0)
+        spanString.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 
+            0, spanString.length, 0)
+        creditsMenuItem?.title = spanString
+        
         updateCreditsDisplay() // Set initial credits value
         return true
     }
@@ -355,7 +402,15 @@ class UserInfoActivity : AppCompatActivity() {
      */
     private fun updateCreditsDisplay() {
         // Update the menu item text if available
-        creditsMenuItem?.title = "$${creditsManager.getCreditsBalance()}"
+        creditsMenuItem?.let { menuItem ->
+            val credits = creditsManager.getCreditsBalance()
+            // Create a SpannableString to apply custom styling
+            val creditText = "$${credits}"
+            val spannableString = android.text.SpannableString(creditText)
+            
+            // Set the title with the styled text
+            menuItem.title = spannableString
+        }
     }
     
     /**
@@ -365,5 +420,11 @@ class UserInfoActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateCreditsDisplay()
+    }
+    
+    override fun onSupportNavigateUp(): Boolean {
+        Log.d(TAG, "onSupportNavigateUp: Navigating back")
+        onBackPressed()
+        return true
     }
 } 
