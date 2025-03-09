@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -20,6 +21,9 @@ import com.example.instrumentsrental.utils.InstrumentDataProvider
  * Allows users to select and configure their instrument rental options.
  */
 class MainActivity : AppCompatActivity() {
+    
+    // Tag for logging
+    private val TAG = "MainActivity"
     
     // UI components
     private lateinit var instrumentSpinner: Spinner
@@ -57,6 +61,7 @@ class MainActivity : AppCompatActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate: Initializing MainActivity")
         setContentView(R.layout.activity_main)
         
         // Initialize credits manager
@@ -65,12 +70,14 @@ class MainActivity : AppCompatActivity() {
         // Initialize views
         initializeViews()
         setupListeners()
+        Log.d(TAG, "onCreate: Setup complete")
     }
     
     /**
      * Initialize all UI views from layout. Binds layout elements to properties.
      */
     private fun initializeViews() {
+        Log.d(TAG, "initializeViews: Binding UI elements")
         instrumentSpinner = findViewById(R.id.instrumentSpinner)
         instrumentImage = findViewById(R.id.instrumentImage)
         instrumentName = findViewById(R.id.instrumentName)
@@ -92,15 +99,18 @@ class MainActivity : AppCompatActivity() {
      * Configures spinner, radio buttons, quantity input and action buttons.
      */
     private fun setupListeners() {
+        Log.d(TAG, "setupListeners: Setting up UI listeners")
         setupSpinner()
         setupPeriodRadioButtons()
         setupQuantityInput()
         
         cancelButton.setOnClickListener {
+            Log.d(TAG, "Cancel button clicked")
             resetToDefaults()
         }
         
         borrowButton.setOnClickListener {
+            Log.d(TAG, "Borrow button clicked")
             processBorrowing()
         }
     }
@@ -111,6 +121,7 @@ class MainActivity : AppCompatActivity() {
      */
     override fun onResume() {
         super.onResume()
+        Log.d(TAG, "onResume: Activity resumed")
         updateCreditsDisplay()
     }
     
@@ -119,7 +130,9 @@ class MainActivity : AppCompatActivity() {
      * Shows current credit balance in the action bar.
      */
     private fun updateCreditsDisplay() {
-        creditsMenuItem?.title = "$${creditsManager.getCreditsBalance()}"
+        val credits = creditsManager.getCreditsBalance()
+        Log.d(TAG, "updateCreditsDisplay: Current credits balance: $credits")
+        creditsMenuItem?.title = "$${credits}"
     }
     
     /**
@@ -128,6 +141,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun setupSpinner() {
         val categories = InstrumentDataProvider.getCategories()
+        Log.d(TAG, "setupSpinner: Loading ${categories.size} instrument categories")
         
         val adapter = ArrayAdapter(
             this,
@@ -141,10 +155,12 @@ class MainActivity : AppCompatActivity() {
         instrumentSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedCategory = parent.getItemAtPosition(position).toString()
+                Log.d(TAG, "onItemSelected: Category selected: $selectedCategory")
                 updateInstrumentDetails(selectedCategory)
             }
             
             override fun onNothingSelected(parent: AdapterView<*>) {
+                Log.d(TAG, "onNothingSelected: No instrument category selected")
                 // Do nothing
             }
         }
@@ -157,6 +173,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupPeriodRadioButtons() {
         periodGroup.setOnCheckedChangeListener { _, checkedId ->
             isMonthly = checkedId == R.id.monthlyChip
+            Log.d(TAG, "setupPeriodRadioButtons: Period changed, isMonthly=$isMonthly")
             updateQuantityLabel()
             updatePriceDisplay()
         }
@@ -178,14 +195,17 @@ class MainActivity : AppCompatActivity() {
                     val value = s.toString().toInt()
                     if (value in 1..99) {
                         quantity = value
+                        Log.d(TAG, "Quantity changed to: $quantity")
                         updatePriceDisplay()
                     } else if (value > 99) {
+                        Log.d(TAG, "Quantity exceeds limit (99), setting to max")
                         quantityEditText.setText("99")
                         quantityEditText.setSelection(2)
                     }
                 } catch (e: NumberFormatException) {
                     if (s.toString().isEmpty()) {
                         quantity = 1
+                        Log.d(TAG, "Empty quantity, defaulting to 1")
                         updatePriceDisplay()
                     }
                 }
@@ -203,6 +223,8 @@ class MainActivity : AppCompatActivity() {
         val instrument = InstrumentDataProvider.getInstrumentByCategory(category)
         currentInstrument = instrument
         
+        Log.d(TAG, "updateInstrumentDetails: Loading details for ${instrument.name}")
+        
         // Update UI with instrument details in the correct order
         instrumentName.text = instrument.name
         descriptionTextView.text = instrument.description
@@ -219,6 +241,7 @@ class MainActivity : AppCompatActivity() {
      * @param rating The rating value (0-5)
      */
     private fun setupRatingBar(rating: Float) {
+        Log.d(TAG, "setupRatingBar: Setting up rating display for rating=$rating")
         ratingContainer.removeAllViews()
         ratingContainer.gravity = android.view.Gravity.CENTER_VERTICAL
         
@@ -273,9 +296,9 @@ class MainActivity : AppCompatActivity() {
      * Changes label to reflect weekly or monthly selection.
      */
     private fun updateQuantityLabel() {
-        quantityLabel.text = getString(
-            if (isMonthly) R.string.label_quantity_months else R.string.label_quantity_weeks
-        )
+        val labelRes = if (isMonthly) R.string.label_quantity_months else R.string.label_quantity_weeks
+        Log.d(TAG, "updateQuantityLabel: Updating to ${resources.getString(labelRes)}")
+        quantityLabel.text = getString(labelRes)
     }
     
     /**
@@ -287,6 +310,8 @@ class MainActivity : AppCompatActivity() {
         
         val basePrice = if (isMonthly) instrument.price * 4 else instrument.price
         val totalPrice = basePrice * quantity
+        
+        Log.d(TAG, "updatePriceDisplay: Base price=$basePrice, Total price=$totalPrice, isMonthly=$isMonthly, quantity=$quantity")
         
         totalPriceTextView.text = getString(R.string.format_total_price, totalPrice)
         pricePerPeriodTextView.text = getString(
@@ -310,18 +335,24 @@ class MainActivity : AppCompatActivity() {
         }
         
         val currentBalance = creditsManager.getCreditsBalance()
+        Log.d(TAG, "processBorrowing: Attempting to rent instrument. Required credits=$totalPrice, Available balance=$currentBalance")
         
         if (totalPrice > currentBalance) {
+            Log.d(TAG, "processBorrowing: Insufficient credits, showing dialog")
             AlertDialog.Builder(this)
                 .setTitle(R.string.title_insufficient_credits)
                 .setMessage(getString(R.string.message_insufficient_credits, totalPrice, currentBalance))
                 .setPositiveButton(R.string.action_add_credits) { _, _ ->
+                    Log.d(TAG, "processBorrowing: User chose to add credits")
                     startActivity(Intent(this, CreditsActivity::class.java))
                 }
-                .setNegativeButton(R.string.action_cancel, null)
+                .setNegativeButton(R.string.action_cancel) { _, _ ->
+                    Log.d(TAG, "processBorrowing: User cancelled adding credits")
+                }
                 .show()
         } else {
             // If user has enough credits, proceed to user info screen
+            Log.d(TAG, "processBorrowing: Sufficient credits, proceeding to user info")
             val rentalPeriod = if (isMonthly) {
                 val periodString = if (quantity > 1) 
                     R.string.format_period_months else R.string.format_period_month
@@ -355,6 +386,7 @@ class MainActivity : AppCompatActivity() {
      * Clears all user selections and returns to initial state.
      */
     private fun resetToDefaults() {
+        Log.d(TAG, "resetToDefaults: Resetting all selections to default values")
         instrumentSpinner.setSelection(0)
         periodGroup.check(R.id.weeklyChip)
         isMonthly = false
@@ -369,6 +401,7 @@ class MainActivity : AppCompatActivity() {
      * Creates the action bar menu with credits balance.
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        Log.d(TAG, "onCreateOptionsMenu: Creating options menu")
         menuInflater.inflate(R.menu.main_menu, menu)
         creditsMenuItem = menu.findItem(R.id.action_credits)
         updateCreditsDisplay()
@@ -382,8 +415,11 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         
+        Log.d(TAG, "onActivityResult: requestCode=$requestCode, resultCode=$resultCode")
+        
         if (requestCode == REQUEST_USER_INFO && resultCode == RESULT_OK) {
             // Rental was successful
+            Log.d(TAG, "onActivityResult: Rental was successful, resetting UI")
             resetToDefaults()
         }
     }
