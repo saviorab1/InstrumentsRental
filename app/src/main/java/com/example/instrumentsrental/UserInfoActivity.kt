@@ -5,6 +5,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Patterns
 import android.view.MenuItem
+import android.view.Menu
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -38,6 +39,8 @@ class UserInfoActivity : AppCompatActivity() {
     
     private lateinit var rentalDetails: RentalDetails
     private lateinit var creditsManager: CreditsManager
+    
+    private var creditsMenuItem: MenuItem? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -250,6 +253,9 @@ class UserInfoActivity : AppCompatActivity() {
         // Update credits balance
         creditsManager.setCreditsBalance(newBalance)
         
+        // Update the displayed balance
+        updateCreditsDisplay()
+        
         // Show success message
         AlertDialog.Builder(this)
             .setTitle("Rental Successful!")
@@ -262,5 +268,30 @@ class UserInfoActivity : AppCompatActivity() {
             }
             .setCancelable(false)
             .show()
+    }
+    
+    /**
+     * Set up the credits menu item
+     */
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        creditsMenuItem = menu.findItem(R.id.action_credits)
+        updateCreditsDisplay() // Set initial credits value
+        return true
+    }
+    
+    /**
+     * Updates the credits balance in the menu item
+     */
+    private fun updateCreditsDisplay() {
+        // Update the menu item text if available
+        creditsMenuItem?.title = "$${creditsManager.getCreditsBalance()}"
+    }
+    
+    // Also update onResume to refresh the display when returning to this activity
+    override fun onResume() {
+        super.onResume()
+        // Update credits display when returning to this activity
+        updateCreditsDisplay()
     }
 } 
