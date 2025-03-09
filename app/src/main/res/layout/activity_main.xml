@@ -2,7 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/transparent_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -152,6 +153,37 @@
             android:textSize="20sp"
             android:layout_marginBottom="24dp"
             tools:text="(250 credits per week)" />
+
+        <!-- Add the buttons in a horizontal layout -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Cancel"
+                android:textSize="18sp"
+                android:backgroundTint="#888888"
+                android:padding="12dp" />
+
+            <Button
+                android:id="@+id/borrowButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Borrow"
+                android:textSize="18sp"
+                android:backgroundTint="@color/purple_500"
+                android:padding="12dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView> 

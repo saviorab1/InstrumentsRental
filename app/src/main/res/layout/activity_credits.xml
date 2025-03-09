@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:padding="24dp"
     android:gravity="center_horizontal"
+    android:background="@drawable/transparent_background"
     tools:context=".CreditsActivity">
 
     <TextView
