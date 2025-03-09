@@ -28,4 +28,14 @@
     <string name="format_period_weeks">weeks</string>
     <string name="format_period_month">month</string>
     <string name="format_period_months">months</string>
+    
+    <!-- Add these new strings -->
+    <string name="title_user_info">Rental Information</string>
+    <string name="confirm_button">Confirm</string>
+    <string name="personal_information">Personal Information</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="rental_details_format">Rental: %1$s for %2$d credits</string>
+    <string name="confirm_rental_title">Confirm Rental</string>
+    <string name="rental_success_title">Rental Successful!</string>
+    <string name="message_booking_cancelled">Your booking has been cancelled!</string>
 </resources>

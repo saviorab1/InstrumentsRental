@@ -26,11 +26,7 @@
         <!-- Instrument Name - Moved up, larger -->
         <TextView
             android:id="@+id/instrumentName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"
+            style="@style/InstrumentTitle"
             tools:text="Steinway Piano" />
 
         <!-- Description - Moved up, below title -->
@@ -154,6 +150,11 @@
             android:layout_marginBottom="24dp"
             tools:text="(250 credits per week)" />
 
+        <!-- Replace the section title with: -->
+        <TextView
+            style="@style/SectionHeading"
+            android:text="Rental Options" />
+
         <!-- Add the buttons in a horizontal layout -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -163,25 +164,21 @@
 
             <Button
                 android:id="@+id/cancelButton"
+                style="@style/Button.Secondary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="Cancel"
-                android:textSize="18sp"
-                android:backgroundTint="#888888"
-                android:padding="12dp" />
+                android:text="@string/action_cancel" />
 
             <Button
                 android:id="@+id/borrowButton"
+                style="@style/Button.Primary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Borrow"
-                android:textSize="18sp"
-                android:backgroundTint="@color/purple_500"
-                android:padding="12dp" />
+                android:text="Rent" />
 
         </LinearLayout>
 

@@ -13,6 +13,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.instrumentsrental.model.Instrument
+import com.example.instrumentsrental.model.RentalDetails
 import com.example.instrumentsrental.utils.CreditsManager
 import com.example.instrumentsrental.utils.InstrumentDataProvider
 
@@ -44,6 +45,11 @@ class MainActivity : AppCompatActivity() {
     
     // Reference to menu item
     private var creditsMenuItem: MenuItem? = null
+    
+    // Add this constant at the top of your class
+    companion object {
+        private const val REQUEST_USER_INFO = 101
+    }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -305,7 +311,7 @@ class MainActivity : AppCompatActivity() {
         weeklyRadioButton.isChecked = true
         quantityEditText.setText("1")
         
-        Toast.makeText(this, R.string.message_selection_reset, Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, R.string.message_booking_cancelled, Toast.LENGTH_SHORT).show()
     }
 
     /**
@@ -331,11 +337,7 @@ class MainActivity : AppCompatActivity() {
                 .setNegativeButton(R.string.action_cancel, null)
                 .show()
         } else {
-            // Sufficient credits, process the rental
-            val remainingBalance = currentBalance - totalPrice
-            creditsManager.setCreditsBalance(remainingBalance)
-            updateCreditsDisplay()
-            
+            // If user has enough credits, proceed to user info screen
             val rentalPeriod = if (isMonthly) {
                 val periodString = if (quantity > 1) 
                     R.string.format_period_months else R.string.format_period_month
@@ -346,17 +348,33 @@ class MainActivity : AppCompatActivity() {
                 "$quantity ${getString(periodString)}"
             }
             
-            Toast.makeText(
-                this,
-                getString(R.string.message_rental_success, 
-                    instrument.name, rentalPeriod, totalPrice, remainingBalance),
-                Toast.LENGTH_LONG
-            ).show()
-            
-            Handler(Looper.getMainLooper()).postDelayed(
-                { resetToDefaults() }, 
-                resources.getInteger(R.integer.success_reset_delay).toLong()
+            // Create rental details object to pass to UserInfoActivity
+            val rentalDetails = RentalDetails(
+                instrumentName = instrument.name,
+                instrumentDescription = instrument.description,
+                instrumentImageRes = instrument.imageRes,
+                rentalPeriod = rentalPeriod,
+                totalPrice = totalPrice,
+                isMonthly = isMonthly,
+                quantity = quantity
             )
+            
+            // Launch UserInfoActivity with rental details
+            val intent = Intent(this, UserInfoActivity::class.java)
+            intent.putExtra("RENTAL_DETAILS", rentalDetails)
+            startActivityForResult(intent, REQUEST_USER_INFO)
+        }
+    }
+
+    // Handle activity result
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        
+        if (requestCode == REQUEST_USER_INFO && resultCode == RESULT_OK) {
+            // Reset after successful rental
+            resetToDefaults()
+            // Update credits display
+            updateCreditsDisplay()
         }
     }
 }

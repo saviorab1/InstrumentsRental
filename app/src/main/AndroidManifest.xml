@@ -24,6 +24,10 @@
             android:name=".CreditsActivity"
             android:exported="false"
             android:label="Credits Management" />
+        <activity
+            android:name=".UserInfoActivity"
+            android:exported="false"
+            android:label="@string/title_user_info" />
     </application>
 
 </manifest>
