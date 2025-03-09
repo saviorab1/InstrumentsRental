@@ -1,3 +1,31 @@
 <resources>
     <string name="app_name">InstrumentsRental</string>
+    
+    <!-- Activity titles -->
+    <string name="title_instrument_rental">Instrument Rental</string>
+    <string name="title_credits_management">Credits Management</string>
+    
+    <!-- Selection reset -->
+    <string name="message_selection_reset">Selection reset</string>
+    
+    <!-- Labels -->
+    <string name="label_quantity_weeks">Number of weeks:</string>
+    <string name="label_quantity_months">Number of months:</string>
+    
+    <!-- Price formatting -->
+    <string name="format_total_price">%d credits total</string>
+    <string name="format_price_per_period">(%d credits per %s)</string>
+    
+    <!-- Borrowing -->
+    <string name="title_insufficient_credits">Insufficient Credits</string>
+    <string name="message_insufficient_credits">You need %1$d credits but only have %2$d. Would you like to add more credits?</string>
+    <string name="action_add_credits">Add Credits</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="message_rental_success">Success! Rented %1$s for %2$s (%3$d credits). Remaining balance: %4$d</string>
+    
+    <!-- Period formatting -->
+    <string name="format_period_week">week</string>
+    <string name="format_period_weeks">weeks</string>
+    <string name="format_period_month">month</string>
+    <string name="format_period_months">months</string>
 </resources>

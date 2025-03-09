@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rating stars -->
+    <dimen name="rating_star_size">40dp</dimen>
+    <dimen name="rating_text_padding_start">8dp</dimen>
+    <dimen name="rating_text_size">20sp</dimen>
+    <dimen name="rating_star_margin">-6dp</dimen>
+    
+    <!-- Delays -->
+    <integer name="success_reset_delay">2000</integer>
+</resources> 

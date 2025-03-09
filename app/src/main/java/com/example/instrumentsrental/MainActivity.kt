@@ -198,30 +198,51 @@ class MainActivity : AppCompatActivity() {
      * Create dynamic rating stars based on instrument rating
      */
     private fun setupRatingBar(rating: Float) {
-        // Clear existing stars
         ratingContainer.removeAllViews()
+        ratingContainer.gravity = android.view.Gravity.CENTER_VERTICAL
         
-        // Add stars based on rating
         val roundedRating = kotlin.math.round(rating).toInt()
+        val starSize = resources.getDimensionPixelSize(R.dimen.rating_star_size)
+        val starMargin = resources.getDimensionPixelSize(R.dimen.rating_star_margin)
+        
+        // Create horizontal layout for stars only
+        val starsLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        
         for (i in 1..5) {
             val isFilled = i <= roundedRating
             val starImageView = ImageView(this).apply {
                 setImageResource(R.drawable.star)
-                layoutParams = LinearLayout.LayoutParams(120, 120)
+                layoutParams = LinearLayout.LayoutParams(starSize, starSize).apply {
+                    marginEnd = starMargin // Negative margin to reduce gap between stars
+                }
                 alpha = if (isFilled) 1f else 0.3f
             }
-            ratingContainer.addView(starImageView)
+            starsLayout.addView(starImageView)
         }
         
-        // Add rating text
+        // Add stars layout to the container
+        ratingContainer.addView(starsLayout)
+        
+        // Add the rating text
         val ratingText = TextView(this).apply {
             text = String.format("%.1f", rating)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            setPadding(20, 0, 0, 0)
-            textSize = 24f
+            setPadding(
+                resources.getDimensionPixelSize(R.dimen.rating_text_padding_start),
+                0, 0, 0
+            )
+            textSize = resources.getDimension(R.dimen.rating_text_size) / 
+                       resources.displayMetrics.density
+            gravity = android.view.Gravity.CENTER_VERTICAL
         }
         ratingContainer.addView(ratingText)
     }
@@ -230,7 +251,9 @@ class MainActivity : AppCompatActivity() {
      * Update the quantity label text based on selected period
      */
     private fun updateQuantityLabel() {
-        quantityLabel.text = "Number of ${if (isMonthly) "months" else "weeks"}:"
+        quantityLabel.text = getString(
+            if (isMonthly) R.string.label_quantity_months else R.string.label_quantity_weeks
+        )
     }
     
     /**
@@ -242,8 +265,12 @@ class MainActivity : AppCompatActivity() {
         val basePrice = if (isMonthly) instrument.price * 4 else instrument.price
         val totalPrice = basePrice * quantity
         
-        totalPriceTextView.text = "$totalPrice credits total"
-        pricePerPeriodTextView.text = "(${basePrice} credits per ${if (isMonthly) "month" else "week"})"
+        totalPriceTextView.text = getString(R.string.format_total_price, totalPrice)
+        pricePerPeriodTextView.text = getString(
+            R.string.format_price_per_period,
+            basePrice,
+            getString(if (isMonthly) R.string.format_period_month else R.string.format_period_week)
+        )
     }
 
     /**
@@ -274,17 +301,11 @@ class MainActivity : AppCompatActivity() {
      * Reset all selections to default values
      */
     private fun resetToDefaults() {
-        // Reset to first item in spinner
         instrumentSpinner.setSelection(0)
-        
-        // Reset to weekly rental
         weeklyRadioButton.isChecked = true
-        
-        // Reset quantity to 1
         quantityEditText.setText("1")
         
-        // Show confirmation
-        Toast.makeText(this, "Selection reset", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, R.string.message_selection_reset, Toast.LENGTH_SHORT).show()
     }
 
     /**
@@ -301,15 +322,13 @@ class MainActivity : AppCompatActivity() {
         val currentBalance = creditsManager.getCreditsBalance()
         
         if (totalPrice > currentBalance) {
-            // Show a dialog asking if they want to add more credits
             AlertDialog.Builder(this)
-                .setTitle("Insufficient Credits")
-                .setMessage("You need $totalPrice credits but only have $currentBalance. Would you like to add more credits?")
-                .setPositiveButton("Add Credits") { _, _ ->
-                    // Open credits activity
+                .setTitle(R.string.title_insufficient_credits)
+                .setMessage(getString(R.string.message_insufficient_credits, totalPrice, currentBalance))
+                .setPositiveButton(R.string.action_add_credits) { _, _ ->
                     startActivity(Intent(this, CreditsActivity::class.java))
                 }
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(R.string.action_cancel, null)
                 .show()
         } else {
             // Sufficient credits, process the rental
@@ -317,23 +336,27 @@ class MainActivity : AppCompatActivity() {
             creditsManager.setCreditsBalance(remainingBalance)
             updateCreditsDisplay()
             
-            // Show success toast with correct name reference
             val rentalPeriod = if (isMonthly) {
-                "$quantity ${if (quantity > 1) "months" else "month"}"
+                val periodString = if (quantity > 1) 
+                    R.string.format_period_months else R.string.format_period_month
+                "$quantity ${getString(periodString)}"
             } else {
-                "$quantity ${if (quantity > 1) "weeks" else "week"}"
+                val periodString = if (quantity > 1) 
+                    R.string.format_period_weeks else R.string.format_period_week
+                "$quantity ${getString(periodString)}"
             }
             
             Toast.makeText(
                 this,
-                "Success! Rented ${instrument.name} for $rentalPeriod ($totalPrice credits). Remaining balance: $remainingBalance",
+                getString(R.string.message_rental_success, 
+                    instrument.name, rentalPeriod, totalPrice, remainingBalance),
                 Toast.LENGTH_LONG
             ).show()
             
-            // Reset after successful rental (auto-reset after delay)
-            Handler(Looper.getMainLooper()).postDelayed({
-                resetToDefaults()
-            }, 2000)
+            Handler(Looper.getMainLooper()).postDelayed(
+                { resetToDefaults() }, 
+                resources.getInteger(R.integer.success_reset_delay).toLong()
+            )
         }
     }
 }
