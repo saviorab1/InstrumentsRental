@@ -2,8 +2,6 @@ package com.example.instrumentsrental
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
@@ -17,6 +15,10 @@ import com.example.instrumentsrental.model.RentalDetails
 import com.example.instrumentsrental.utils.CreditsManager
 import com.example.instrumentsrental.utils.InstrumentDataProvider
 
+/**
+ * MainActivity - Main screen of the Instruments Rental application.
+ * Allows users to select and configure their instrument rental options.
+ */
 class MainActivity : AppCompatActivity() {
     
     // UI components
@@ -35,7 +37,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cancelButton: Button
     private lateinit var borrowButton: Button
     
-    // Add credits manager
+    // Credits management
     private lateinit var creditsManager: CreditsManager
     
     // State variables
@@ -46,11 +48,13 @@ class MainActivity : AppCompatActivity() {
     // Reference to menu item
     private var creditsMenuItem: MenuItem? = null
     
-    // Add this constant at the top of your class
     companion object {
         private const val REQUEST_USER_INFO = 101
     }
     
+    /**
+     * Initializes the activity, sets up the UI components and listeners.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -64,7 +68,7 @@ class MainActivity : AppCompatActivity() {
     }
     
     /**
-     * Initialize all UI views from layout
+     * Initialize all UI views from layout. Binds layout elements to properties.
      */
     private fun initializeViews() {
         instrumentSpinner = findViewById(R.id.instrumentSpinner)
@@ -84,7 +88,8 @@ class MainActivity : AppCompatActivity() {
     }
     
     /**
-     * Set up all event listeners
+     * Set up all event listeners for user interactions.
+     * Configures spinner, radio buttons, quantity input and action buttons.
      */
     private fun setupListeners() {
         setupSpinner()
@@ -101,24 +106,25 @@ class MainActivity : AppCompatActivity() {
     }
     
     /**
-     * Updates credits display when returning to activity
+     * Updates credits display when returning to activity.
+     * Called when the activity returns to foreground.
      */
     override fun onResume() {
         super.onResume()
-        // Update credits display when returning to this activity
         updateCreditsDisplay()
     }
     
     /**
-     * Updates the credits balance in the menu item
+     * Updates the credits balance in the menu item.
+     * Shows current credit balance in the action bar.
      */
     private fun updateCreditsDisplay() {
-        // Update the menu item text if available
         creditsMenuItem?.title = "$${creditsManager.getCreditsBalance()}"
     }
     
     /**
-     * Set up the instrument category spinner with data and listener
+     * Set up the instrument category spinner with data and listener.
+     * Populates spinner with instrument categories and handles selection changes.
      */
     private fun setupSpinner() {
         val categories = InstrumentDataProvider.getCategories()
@@ -145,7 +151,8 @@ class MainActivity : AppCompatActivity() {
     }
     
     /**
-     * Set up weekly/monthly radio button group
+     * Set up weekly/monthly radio button group.
+     * Handles rental period selection changes between weekly and monthly options.
      */
     private fun setupPeriodRadioButtons() {
         periodGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -156,7 +163,9 @@ class MainActivity : AppCompatActivity() {
     }
     
     /**
-     * Set up quantity input field with validation
+     * Set up quantity input field with validation.
+     * Validates and processes user input for rental quantity.
+     * Restricts input to 1-99 range and updates price accordingly.
      */
     private fun setupQuantityInput() {
         quantityEditText.addTextChangedListener(object : TextWatcher {
@@ -185,7 +194,10 @@ class MainActivity : AppCompatActivity() {
     }
     
     /**
-     * Update the UI with details of the selected instrument
+     * Update the UI with details of the selected instrument.
+     * Populates UI elements with data from the selected instrument.
+     * 
+     * @param category The selected instrument category
      */
     private fun updateInstrumentDetails(category: String) {
         val instrument = InstrumentDataProvider.getInstrumentByCategory(category)
@@ -201,7 +213,10 @@ class MainActivity : AppCompatActivity() {
     }
     
     /**
-     * Create dynamic rating stars based on instrument rating
+     * Create dynamic rating stars based on instrument rating.
+     * Generates a visual representation of the instrument's rating.
+     * 
+     * @param rating The rating value (0-5)
      */
     private fun setupRatingBar(rating: Float) {
         ratingContainer.removeAllViews()
@@ -225,7 +240,7 @@ class MainActivity : AppCompatActivity() {
             val starImageView = ImageView(this).apply {
                 setImageResource(R.drawable.star)
                 layoutParams = LinearLayout.LayoutParams(starSize, starSize).apply {
-                    marginEnd = starMargin // Negative margin to reduce gap between stars
+                    marginEnd = starMargin
                 }
                 alpha = if (isFilled) 1f else 0.3f
             }
@@ -254,7 +269,8 @@ class MainActivity : AppCompatActivity() {
     }
     
     /**
-     * Update the quantity label text based on selected period
+     * Update the quantity label text based on selected period.
+     * Changes label to reflect weekly or monthly selection.
      */
     private fun updateQuantityLabel() {
         quantityLabel.text = getString(
@@ -263,7 +279,8 @@ class MainActivity : AppCompatActivity() {
     }
     
     /**
-     * Calculate and display prices based on current selections
+     * Calculate and display prices based on current selections.
+     * Updates the UI with calculated price information.
      */
     private fun updatePriceDisplay() {
         val instrument = currentInstrument ?: return
@@ -278,44 +295,11 @@ class MainActivity : AppCompatActivity() {
             getString(if (isMonthly) R.string.format_period_month else R.string.format_period_week)
         )
     }
-
+    
     /**
-     * Set up the credits menu item
-     */
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        creditsMenuItem = menu.findItem(R.id.action_credits)
-        updateCreditsDisplay() // Set initial credits value
-        return true
-    }
-
-    /**
-     * Handle menu item selections
-     */
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_credits -> {
-                // Launch the Credits Activity
-                startActivity(Intent(this, CreditsActivity::class.java))
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    /**
-     * Reset all selections to default values
-     */
-    private fun resetToDefaults() {
-        instrumentSpinner.setSelection(0)
-        weeklyRadioButton.isChecked = true
-        quantityEditText.setText("1")
-        
-        Toast.makeText(this, R.string.message_booking_cancelled, Toast.LENGTH_SHORT).show()
-    }
-
-    /**
-     * Process the borrowing transaction
+     * Process the instrument borrowing request.
+     * Checks credit balance and either initiates the rental process
+     * or prompts the user to add more credits.
      */
     private fun processBorrowing() {
         val instrument = currentInstrument ?: return
@@ -365,16 +349,42 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(intent, REQUEST_USER_INFO)
         }
     }
-
-    // Handle activity result
+    
+    /**
+     * Reset selection to defaults and notify user.
+     * Clears all user selections and returns to initial state.
+     */
+    private fun resetToDefaults() {
+        instrumentSpinner.setSelection(0)
+        periodGroup.check(R.id.weeklyChip)
+        isMonthly = false
+        quantityEditText.setText("1")
+        quantity = 1
+        
+        Toast.makeText(this, R.string.message_selection_reset, Toast.LENGTH_SHORT).show()
+    }
+    
+    /**
+     * Inflate options menu with credits display.
+     * Creates the action bar menu with credits balance.
+     */
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        creditsMenuItem = menu.findItem(R.id.action_credits)
+        updateCreditsDisplay()
+        return true
+    }
+    
+    /**
+     * Handle activity result from UserInfoActivity.
+     * Process the result of the rental flow.
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         
         if (requestCode == REQUEST_USER_INFO && resultCode == RESULT_OK) {
-            // Reset after successful rental
+            // Rental was successful
             resetToDefaults()
-            // Update credits display
-            updateCreditsDisplay()
         }
     }
 }
