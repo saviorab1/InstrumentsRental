@@ -30,7 +30,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var instrumentSpinner: Spinner
     private lateinit var instrumentImage: ImageView
     private lateinit var instrumentName: TextView
-    private lateinit var ratingContainer: LinearLayout
+    private lateinit var instrumentRatingBar: RatingBar
+    private lateinit var ratingTextView: TextView
     private lateinit var periodGroup: RadioGroup
     private lateinit var weeklyRadioButton: RadioButton
     private lateinit var monthlyRadioButton: RadioButton
@@ -53,6 +54,11 @@ class MainActivity : AppCompatActivity() {
     // Reference to menu item
     private var creditsMenuItem: MenuItem? = null
     
+    // State keys for saving instance state
+    private val KEY_IS_MONTHLY = "is_monthly"
+    private val KEY_QUANTITY = "quantity"
+    private val KEY_SELECTED_INSTRUMENT = "selected_instrument"
+    
     companion object {
         private const val REQUEST_USER_INFO = 101
     }
@@ -74,6 +80,12 @@ class MainActivity : AppCompatActivity() {
         // Initialize views
         initializeViews()
         setupListeners()
+        
+        // Restore state if available
+        if (savedInstanceState != null) {
+            restoreInstanceState(savedInstanceState)
+        }
+        
         Log.d(TAG, "onCreate: Setup complete")
     }
     
@@ -85,7 +97,8 @@ class MainActivity : AppCompatActivity() {
         instrumentSpinner = findViewById(R.id.instrumentSpinner)
         instrumentImage = findViewById(R.id.instrumentImage)
         instrumentName = findViewById(R.id.instrumentName)
-        ratingContainer = findViewById(R.id.ratingContainer)
+        instrumentRatingBar = findViewById(R.id.instrumentRatingBar)
+        ratingTextView = findViewById(R.id.ratingTextView)
         periodGroup = findViewById(R.id.periodChipGroup)
         weeklyRadioButton = findViewById(R.id.weeklyChip)
         monthlyRadioButton = findViewById(R.id.monthlyChip)
@@ -262,70 +275,21 @@ class MainActivity : AppCompatActivity() {
         // Update UI with instrument details in the correct order
         instrumentName.text = instrument.name
         descriptionTextView.text = instrument.description
-        setupRatingBar(instrument.rating)
+        updateRatingBar(instrument.rating)
         instrumentImage.setImageResource(instrument.imageRes)
         
         updatePriceDisplay()
     }
     
     /**
-     * Create dynamic rating stars based on instrument rating.
-     * Generates a visual representation of the instrument's rating.
-     * 
-     * @param rating The rating value (0-5)
+     * Updates the rating bar with the instrument's rating value
      */
-    private fun setupRatingBar(rating: Float) {
-        Log.d(TAG, "setupRatingBar: Setting up rating display for rating=$rating")
-        ratingContainer.removeAllViews()
-        ratingContainer.gravity = android.view.Gravity.CENTER_VERTICAL
+    private fun updateRatingBar(rating: Float) {
+        // Set the rating on the RatingBar
+        instrumentRatingBar.rating = rating
         
-        val roundedRating = kotlin.math.round(rating).toInt()
-        val starSize = resources.getDimensionPixelSize(R.dimen.rating_star_size)
-        val starMargin = resources.getDimensionPixelSize(R.dimen.rating_star_margin)
-        
-        // Create horizontal layout for stars only
-        val starsLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
-        
-        for (i in 1..5) {
-            val isFilled = i <= roundedRating
-            val starImageView = ImageView(this).apply {
-                setImageResource(R.drawable.star)
-                layoutParams = LinearLayout.LayoutParams(starSize, starSize).apply {
-                    marginEnd = starMargin
-                }
-                alpha = if (isFilled) 1f else 0.3f
-            }
-            starsLayout.addView(starImageView)
-        }
-        
-        // Add stars layout to the container
-        ratingContainer.addView(starsLayout)
-        
-        // Add the rating text
-        val ratingText = TextView(this).apply {
-            text = String.format("%.1f", rating)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            setPadding(
-                resources.getDimensionPixelSize(R.dimen.rating_text_padding_start),
-                0, 0, 0
-            )
-            textSize = resources.getDimension(R.dimen.rating_text_size) / 
-                       resources.displayMetrics.density
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            
-            // Apply custom font
-            typeface = resources.getFont(R.font.open_sans_semibold)
-        }
-        ratingContainer.addView(ratingText)
+        // Update the text display of the rating
+        ratingTextView.text = String.format("%.1f", rating)
     }
     
     /**
@@ -495,5 +459,56 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "onActivityResult: Rental was successful, resetting UI")
             resetToDefaults()
         }
+    }
+    
+    /**
+     * Save the current state when the activity might be recreated.
+     */
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        Log.d(TAG, "onSaveInstanceState: Saving instance state")
+        
+        // Save current UI state
+        outState.putBoolean(KEY_IS_MONTHLY, isMonthly)
+        outState.putInt(KEY_QUANTITY, quantity)
+        currentInstrument?.let { instrument ->
+            outState.putString(KEY_SELECTED_INSTRUMENT, instrument.name)
+        }
+    }
+    
+    /**
+     * Restore UI state from saved instance
+     */
+    private fun restoreInstanceState(savedInstanceState: Bundle) {
+        Log.d(TAG, "restoreInstanceState: Restoring instance state")
+        
+        // Restore rental period selection
+        isMonthly = savedInstanceState.getBoolean(KEY_IS_MONTHLY, false)
+        if (isMonthly) {
+            periodGroup.check(R.id.monthlyChip)
+        } else {
+            periodGroup.check(R.id.weeklyChip)
+        }
+        
+        // Restore quantity
+        quantity = savedInstanceState.getInt(KEY_QUANTITY, 1)
+        quantityEditText.setText(quantity.toString())
+        
+        // Restore selected instrument
+        val savedInstrumentName = savedInstanceState.getString(KEY_SELECTED_INSTRUMENT)
+        savedInstrumentName?.let { name ->
+            val categories = InstrumentDataProvider.getCategories()
+            for (i in categories.indices) {
+                val instrument = InstrumentDataProvider.getInstrumentByCategory(categories[i])
+                if (instrument.name == name) {
+                    instrumentSpinner.setSelection(i)
+                    break
+                }
+            }
+        }
+        
+        // Update the UI based on restored state
+        updateQuantityLabel()
+        updatePriceDisplay()
     }
 }

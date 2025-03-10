@@ -18,8 +18,7 @@ import com.google.android.material.textfield.TextInputLayout
 import android.util.Log
 
 /**
- * UserInfoActivity - Handles user information collection for instrument rental.
- * Collects and validates user details before finalizing the rental transaction.
+ * UserInfoActivity - Collects and validates user information for instrument rental
  */
 class UserInfoActivity : AppCompatActivity() {
     
@@ -31,14 +30,13 @@ class UserInfoActivity : AppCompatActivity() {
     private lateinit var instrumentDescriptionTextView: TextView
     private lateinit var rentalDetailsTextView: TextView
     private lateinit var totalPriceTextView: TextView
+    private lateinit var availableBalanceTextView: TextView
     
-    // UI components - Input layouts
+    // UI components - Input fields
     private lateinit var nameInputLayout: TextInputLayout
     private lateinit var addressInputLayout: TextInputLayout
     private lateinit var phoneInputLayout: TextInputLayout
     private lateinit var emailInputLayout: TextInputLayout
-    
-    // UI components - Input fields
     private lateinit var nameEditText: TextInputEditText
     private lateinit var addressEditText: TextInputEditText
     private lateinit var phoneEditText: TextInputEditText
@@ -51,28 +49,24 @@ class UserInfoActivity : AppCompatActivity() {
     // Data
     private lateinit var rentalDetails: RentalDetails
     private lateinit var creditsManager: CreditsManager
-    
-    // Reference to menu item
     private var creditsMenuItem: MenuItem? = null
     
     /**
-     * Initializes the activity, sets up the UI components, and loads rental details.
+     * Initializes the activity, loads rental details, and sets up UI components
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate: Initializing UserInfoActivity")
         setContentView(R.layout.activity_user_info)
         
-        // Set activity title
+        // Set activity title and enable back button
         title = "MUSICLEASE"
-        
-        // Display back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         
         // Initialize credits manager
         creditsManager = CreditsManager(this)
         
-        // Initialize views
+        // Initialize UI elements
         initializeViews()
         
         // Get rental details from intent
@@ -86,128 +80,113 @@ class UserInfoActivity : AppCompatActivity() {
         
         rentalDetails = rentalDetailsFromIntent
         
-        // Setup UI components with rental details
+        // Setup UI components
         setupValidation()
         populateRentalDetails()
         setupButtons()
     }
     
     /**
-     * Initialize all UI views from layout. Binds layout elements to properties.
+     * Connects layout elements to their respective variables
      */
     private fun initializeViews() {
         Log.d(TAG, "initializeViews: Binding UI elements")
         
-        // Initialize instrument details views
+        // Instrument details views
         instrumentNameTextView = findViewById(R.id.instrumentNameTextView)
         instrumentImageView = findViewById(R.id.instrumentImageView)
         instrumentDescriptionTextView = findViewById(R.id.instrumentDescriptionTextView)
         rentalDetailsTextView = findViewById(R.id.rentalDetailsTextView)
         totalPriceTextView = findViewById(R.id.totalPriceTextView)
+        availableBalanceTextView = findViewById(R.id.availableBalanceTextView)
         
-        // Initialize input layouts
+        // Input layouts and fields
         nameInputLayout = findViewById(R.id.nameInputLayout)
         addressInputLayout = findViewById(R.id.addressInputLayout)
         phoneInputLayout = findViewById(R.id.phoneInputLayout)
         emailInputLayout = findViewById(R.id.emailInputLayout)
-        
-        // Initialize input fields
         nameEditText = findViewById(R.id.nameEditText)
         addressEditText = findViewById(R.id.addressEditText)
         phoneEditText = findViewById(R.id.phoneEditText)
         emailEditText = findViewById(R.id.emailEditText)
         
-        // Initialize buttons
+        // Buttons
         cancelButton = findViewById(R.id.cancelButton)
         confirmButton = findViewById(R.id.confirmButton)
     }
     
     /**
-     * Set up validation for all input fields.
-     * Configures real-time validation as the user types.
+     * Sets up real-time validation for input fields
      */
     private fun setupValidation() {
-        // Validate name as user types
+        // Name validation
         nameEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                if (s.toString().trim().isEmpty()) {
-                    nameInputLayout.error = "Name is required"
-                } else {
-                    nameInputLayout.error = null
-                }
+                nameInputLayout.error = if (s.toString().trim().isEmpty()) "Name is required" else null
             }
         })
         
-        // Validate address as user types
+        // Address validation
         addressEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                if (s.toString().trim().isEmpty()) {
-                    addressInputLayout.error = "Address is required"
-                } else {
-                    addressInputLayout.error = null
-                }
+                addressInputLayout.error = if (s.toString().trim().isEmpty()) "Address is required" else null
             }
         })
         
-        // Validate phone as user types
+        // Phone validation
         phoneEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val phone = s.toString().trim()
-                if (phone.isEmpty()) {
-                    phoneInputLayout.error = "Phone number is required"
-                } else if (!phone.matches(Regex("^[0-9]+$"))) {
-                    phoneInputLayout.error = "Phone must contain numbers only"
-                } else if (phone.length < 10) {
-                    phoneInputLayout.error = "Phone must be at least 10 digits"
-                } else {
-                    phoneInputLayout.error = null
+                phoneInputLayout.error = when {
+                    phone.isEmpty() -> "Phone number is required"
+                    !phone.matches(Regex("^[0-9]+$")) -> "Phone must contain numbers only"
+                    phone.length < 10 -> "Phone must be at least 10 digits"
+                    else -> null
                 }
             }
         })
         
-        // Validate email as user types - ensure it has @ character
+        // Email validation
         emailEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val email = s.toString().trim()
-                if (email.isEmpty()) {
-                    emailInputLayout.error = "Email is required"
-                } else if (!email.contains('@') || email.indexOf('@') <= 0 || 
-                           email.indexOf('@') == email.length - 1) {
-                    emailInputLayout.error = "Email must contain @ symbol in the middle"
-                } else {
-                    emailInputLayout.error = null
+                emailInputLayout.error = when {
+                    email.isEmpty() -> "Email is required"
+                    !email.contains('@') || email.indexOf('@') <= 0 || email.indexOf('@') == email.length - 1 -> 
+                        "Email must contain @ symbol in the middle"
+                    else -> null
                 }
             }
         })
     }
     
     /**
-     * Populate the UI with rental details.
-     * Displays instrument information retrieved from the intent.
+     * Fills the UI with rental details from the intent
      */
     private fun populateRentalDetails() {
         Log.d(TAG, "populateRentalDetails: Setting up UI with rental details")
         
         try {
+            // Display instrument information
             instrumentNameTextView.text = rentalDetails.instrumentName
             instrumentImageView.setImageResource(rentalDetails.instrumentImageRes)
             instrumentDescriptionTextView.text = rentalDetails.instrumentDescription
             
-            // Display rental period
-            val rentalPeriodText = "Rental Period: ${rentalDetails.rentalPeriod}"
-            rentalDetailsTextView.text = rentalPeriodText
+            // Display rental and price information
+            rentalDetailsTextView.text = "Rental Period: ${rentalDetails.rentalPeriod}"
+            totalPriceTextView.text = "$${rentalDetails.totalPrice} credits"
             
-            // Display total price
-            val totalPriceText = "$${rentalDetails.totalPrice} credits"
-            totalPriceTextView.text = totalPriceText
+            // Display available balance
+            val availableBalance = creditsManager.getCreditsBalance()
+            availableBalanceTextView.text = "$${availableBalance} credits"
             
         } catch (e: Exception) {
             Log.e(TAG, "populateRentalDetails: Error setting up UI", e)
@@ -216,15 +195,16 @@ class UserInfoActivity : AppCompatActivity() {
     }
     
     /**
-     * Set up button click listeners.
-     * Configures actions for cancel and confirm buttons.
+     * Sets up button click listeners
      */
     private fun setupButtons() {
+        // Cancel button - return to previous screen
         cancelButton.setOnClickListener {
             Toast.makeText(this, "Booking cancelled", Toast.LENGTH_SHORT).show()
             finish()
         }
         
+        // Confirm button - validate inputs and show confirmation
         confirmButton.setOnClickListener {
             if (validateInputs()) {
                 showConfirmationDialog()
@@ -233,8 +213,7 @@ class UserInfoActivity : AppCompatActivity() {
     }
     
     /**
-     * Handle action bar back button.
-     * Processes navigation events, including back button press.
+     * Handles action bar item selections
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
@@ -246,10 +225,7 @@ class UserInfoActivity : AppCompatActivity() {
     }
     
     /**
-     * Validate all input fields before proceeding.
-     * Performs comprehensive validation of all user inputs.
-     * 
-     * @return true if all inputs are valid, false otherwise
+     * Validates all input fields before proceeding
      */
     private fun validateInputs(): Boolean {
         val name = nameEditText.text.toString().trim()
@@ -257,60 +233,45 @@ class UserInfoActivity : AppCompatActivity() {
         val phone = phoneEditText.text.toString().trim()
         val email = emailEditText.text.toString().trim()
         
-        var isNameValid = false
-        var isAddressValid = false
-        var isPhoneValid = false
-        var isEmailValid = false
-        
-        // Validate name
-        if (name.isNotEmpty()) {
-            isNameValid = true
-            nameInputLayout.error = null
-        } else {
+        // Check name
+        if (name.isEmpty()) {
             nameInputLayout.error = "Name is required"
+            return false
         }
         
-        // Validate address
-        if (address.isNotEmpty()) {
-            isAddressValid = true
-            addressInputLayout.error = null
-        } else {
+        // Check address
+        if (address.isEmpty()) {
             addressInputLayout.error = "Address is required"
+            return false
         }
         
-        // Validate phone (numbers only, 10+ digits)
-        if (phone.isNotEmpty() && phone.matches(Regex("^[0-9]+$")) && phone.length >= 10) {
-            isPhoneValid = true
-            phoneInputLayout.error = null
-        } else {
-            if (phone.isEmpty()) {
-                phoneInputLayout.error = "Phone number is required"
-            } else if (!phone.matches(Regex("^[0-9]+$"))) {
-                phoneInputLayout.error = "Phone must contain numbers only"
-            } else {
-                phoneInputLayout.error = "Phone must be at least 10 digits"
-            }
+        // Check phone
+        if (phone.isEmpty()) {
+            phoneInputLayout.error = "Phone number is required"
+            return false
+        } else if (!phone.matches(Regex("^[0-9]+$"))) {
+            phoneInputLayout.error = "Phone must contain numbers only"
+            return false
+        } else if (phone.length < 10) {
+            phoneInputLayout.error = "Phone must be at least 10 digits"
+            return false
         }
         
-        // Validate email (must have @ in the middle)
-        if (email.isNotEmpty() && email.contains('@') && 
-            email.indexOf('@') > 0 && email.indexOf('@') < email.length - 1) {
-            isEmailValid = true
-            emailInputLayout.error = null
-        } else {
-            if (email.isEmpty()) {
-                emailInputLayout.error = "Email is required"
-            } else {
-                emailInputLayout.error = "Email must contain @ symbol in the middle"
-            }
+        // Check email
+        if (email.isEmpty()) {
+            emailInputLayout.error = "Email is required"
+            return false
+        } else if (!email.contains('@') || email.indexOf('@') <= 0 || email.indexOf('@') == email.length - 1) {
+            emailInputLayout.error = "Email must contain @ symbol in the middle"
+            return false
         }
         
-        return isNameValid && isAddressValid && isPhoneValid && isEmailValid
+        // All inputs are valid
+        return true
     }
     
     /**
-     * Show rental confirmation dialog.
-     * Displays a summary of rental and user information for final confirmation.
+     * Shows dialog with summary of rental information for final confirmation
      */
     private fun showConfirmationDialog() {
         val name = nameEditText.text.toString().trim()
@@ -336,16 +297,13 @@ class UserInfoActivity : AppCompatActivity() {
         AlertDialog.Builder(this, R.style.AppDialogTheme)
             .setTitle("Confirm Rental")
             .setMessage(message)
-            .setPositiveButton("Confirm") { _, _ ->
-                processRental()
-            }
+            .setPositiveButton("Confirm") { _, _ -> processRental() }
             .setNegativeButton("Cancel", null)
             .show()
     }
     
     /**
-     * Process the rental transaction.
-     * Updates credits balance and displays success message.
+     * Processes the rental transaction by deducting credits
      */
     private fun processRental() {
         try {
@@ -377,14 +335,13 @@ class UserInfoActivity : AppCompatActivity() {
     }
     
     /**
-     * Set up the credits menu item.
-     * Creates the action bar menu with credits balance.
+     * Creates the options menu with credits display
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         creditsMenuItem = menu.findItem(R.id.action_credits)
         
-        // Set the title text color programmatically
+        // Style the credits display
         val spanString = android.text.SpannableString(creditsMenuItem?.title)
         spanString.setSpan(android.text.style.ForegroundColorSpan(android.graphics.Color.parseColor("#4CAF50")), 
             0, spanString.length, 0)
@@ -392,36 +349,38 @@ class UserInfoActivity : AppCompatActivity() {
             0, spanString.length, 0)
         creditsMenuItem?.title = spanString
         
-        updateCreditsDisplay() // Set initial credits value
+        updateCreditsDisplay()
         return true
     }
     
     /**
-     * Updates the credits balance in the menu item.
-     * Shows current credit balance in the action bar.
+     * Updates the credits display in the action bar and in the UI
      */
     private fun updateCreditsDisplay() {
-        // Update the menu item text if available
+        val credits = creditsManager.getCreditsBalance()
+        
+        // Update menu item
         creditsMenuItem?.let { menuItem ->
-            val credits = creditsManager.getCreditsBalance()
-            // Create a SpannableString to apply custom styling
             val creditText = "$${credits}"
             val spannableString = android.text.SpannableString(creditText)
-            
-            // Set the title with the styled text
             menuItem.title = spannableString
         }
+        
+        // Update balance in UI
+        availableBalanceTextView.text = "$${credits} credits"
     }
     
     /**
-     * Updates credits display when returning to activity.
-     * Called when the activity returns to foreground.
+     * Updates credits display when returning to activity
      */
     override fun onResume() {
         super.onResume()
         updateCreditsDisplay()
     }
     
+    /**
+     * Handles back button navigation
+     */
     override fun onSupportNavigateUp(): Boolean {
         Log.d(TAG, "onSupportNavigateUp: Navigating back")
         onBackPressed()

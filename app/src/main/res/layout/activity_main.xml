@@ -57,11 +57,32 @@
 
                     <!-- Rating Container -->
                     <LinearLayout
-                        android:id="@+id/ratingContainer"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="12dp" />
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+                        
+                        <RatingBar
+                            android:id="@+id/instrumentRatingBar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="?android:attr/ratingBarStyleSmall"
+                            android:numStars="5"
+                            android:stepSize="0.1"
+                            android:isIndicator="true"
+                            android:progressTint="@color/purple_500"
+                            android:progressBackgroundTint="#CCCCCC" />
+                            
+                        <TextView
+                            android:id="@+id/ratingTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/open_sans_semibold"
+                            tools:text="4.5" />
+                    </LinearLayout>
 
                     <!-- Description -->
                     <TextView
